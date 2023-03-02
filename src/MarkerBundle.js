@@ -52,11 +52,13 @@ export default class MarkerBundle {
 
             if(index != this.hovered) {
                 this.hovered = index;
-
+                
                 google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], "mouseover", event);
 
                 this.render();
             }
+
+            google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], "mousemove", event);
 
             return;
         }
