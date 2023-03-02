@@ -1,0 +1,26 @@
+{
+  "name": "@nora-soderlund/markerbundle",
+  "version": "1.0.0",
+  "description": "A way to bundle Google Maps JS markers that are placed at the same coordinate.",
+  "main": "src/MarkerBundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nora-soderlund/MarkerBundle.git"
+  },
+  "keywords": [
+    "google",
+    "maps",
+    "marker",
+    "bundle",
+    "js"
+  ],
+  "author": "Nora Söderlund",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nora-soderlund/MarkerBundle/issues"
+  },
+  "homepage": "https://github.com/nora-soderlund/MarkerBundle#readme"
+}
