@@ -1,6 +1,6 @@
 {
   "name": "@nora-soderlund/markerbundle",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A way to bundle Google Maps JS markers that are placed at the same coordinate.",
   "main": "src/MarkerBundle.js",
   "scripts": {
