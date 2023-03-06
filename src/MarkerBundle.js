@@ -34,10 +34,10 @@ export default class MarkerBundle {
         this.events.forEach((name) => {
             this.marker.addListener(name, (event) => {
                 if(this.hovered !== -1) {
-                    google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], name, event);
+                    google.maps.event.trigger(this.markers[this.hovered], name, event);
                 }
             });
-        })
+        });
 
         this.render();
     };
@@ -55,35 +55,33 @@ export default class MarkerBundle {
     mousemove(event) {
         if(this.hovered !== -1) {
             if(this.isMouseOverImage(this.images[this.hovered].imageData, this.images[this.hovered].canvas.width, event.domEvent.offsetX, event.domEvent.offsetY)) {
-                google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], "mousemove", event);
+                google.maps.event.trigger(this.markers[this.hovered], "mousemove", event);
 
                 return;
             }
-        }
 
-        for(let index = 0; index < this.images.length; index++) {
-            if(!this.isMouseOverImage(this.images[index].imageData, this.images[index].canvas.width, event.domEvent.offsetX, event.domEvent.offsetY))
-                continue;
-
-            if(index != this.hovered) {
-                this.hovered = index;
-                
-                google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], "mouseover", event);
-
-                this.render();
-            }
-
-            google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], "mousemove", event);
-
-            return;
-        }
-
-        if(this.hovered != -1) {
-            google.maps.event.trigger(this.markers[(this.markers.length - 1) - this.hovered], "mouseout", event);
+            google.maps.event.trigger(this.markers[this.hovered], "mouseout", event);
 
             this.hovered = -1;
 
             this.render();
+        }
+
+        for(let index = this.images.length - 1; index !== -1; index--) {
+            if(!this.isMouseOverImage(this.images[index].imageData, this.images[index].canvas.width, event.domEvent.offsetX, event.domEvent.offsetY))
+                continue;
+
+            if(index !== this.hovered) {
+                this.hovered = index;
+                
+                google.maps.event.trigger(this.markers[this.hovered], "mouseover", event);
+
+                this.render();
+            }
+
+            google.maps.event.trigger(this.markers[this.hovered], "mousemove", event);
+
+            return;
         }
     };
 
@@ -106,38 +104,37 @@ export default class MarkerBundle {
 
         this.images = [];
 
-        for(let index = 0; index < this.markers.length; index++)
-            this.images.push(this.renderMarker(index));
+        for(let index = 0; index < this.markers.length; index++) {
+            const color = this.colors[index];
+            const rotation = -45 + (index * (90 / (this.markers.length - 1)));
+
+            this.images.push(this.renderMarker(this.image, color, rotation));
+        }
 
         this.render();
     };
 
-    renderMarker(index) {
-        const color = this.colors[(this.markers.length - 1) - index];
-        const rotation = 45 - (index * (90 / (this.markers.length - 1)));
-
-        const size = Math.max(this.image.width, this.image.height) * 2;
-
+    renderMarker(image, color, rotation) {
         const canvas = document.createElement("canvas");
-        canvas.width = size;
-        canvas.height = this.image.height;
+        canvas.width = image.height * 2;
+        canvas.height = image.height;
     
         const context = canvas.getContext("2d");
     
         context.translate(canvas.width / 2, canvas.height);
         context.rotate(rotation * Math.PI / 180);
 
-        const left = -this.image.width / 2;
-        const top = -this.image.height;
+        const left = -image.width / 2;
+        const top = -image.height;
     
-        context.drawImage(this.image, left, top, this.image.width, this.image.height);
+        context.drawImage(image, left, top, image.width, image.height);
     
         context.globalCompositeOperation = "color";
         context.fillStyle = color;
         context.fillRect(left, top, canvas.width, canvas.height);
     
         context.globalCompositeOperation = "destination-in";
-        context.drawImage(this.image, left, top, this.image.width, this.image.height);
+        context.drawImage(image, left, top, image.width, image.height);
 
         context.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -148,13 +145,17 @@ export default class MarkerBundle {
     };
 
     render() {
-        const size = Math.max(this.image.width, this.image.height) * 2;
-        
         const canvas = document.createElement("canvas");
-        canvas.width = size;
+
+        canvas.width = this.image.height * 2;
         canvas.height = this.image.height;
     
         const context = canvas.getContext("2d");
+
+        context.globalCompositeOperation = "destination-over";
+
+        if(this.hovered !== -1)
+            context.drawImage(this.images[this.hovered].canvas, 0, 0);
     
         this.images.forEach((image, index) => {
             if(this.hovered === index)
@@ -162,9 +163,6 @@ export default class MarkerBundle {
 
             context.drawImage(image.canvas, 0, 0);
         });
-
-        if(this.hovered !== -1)
-            context.drawImage(this.images[this.hovered].canvas, 0, 0);
 
         this.marker.setIcon({
             url: canvas.toDataURL(),
